@@ -1,0 +1,15 @@
+{
+    "name": "ScottyHelp",
+    "description": "Help Intent for Scotty",
+    "slots": [],
+    "sampleUtterances": [
+        "help",
+        "help blacklist",
+        "help bl",
+        "help table access",
+        "help ta"
+    ],
+    "fulfillmentActivity": {
+        "type": "ReturnIntent"
+    }
+}

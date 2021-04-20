@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Blacklist Lambda function for the Scotty LEX Bot
+
+Parameters:
+  apiToken:
+      Type: String
+      Default: ""
+  userList:
+      Type: String
+      Default: ""
+  dynamoDBTable:
+      Type: String
+      Default: "Scotty_Config"
+
+Resources:
+    ExecutionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    -
+                        Effect: "Allow"
+                        Principal:
+                            Service:
+                                - "lambda.amazonaws.com"
+                        Action:
+                            - "sts:AssumeRole"
+            Path: /
+            Policies:
+                -
+                    PolicyName: "AllowIAMPolicyModifications"
+                    PolicyDocument:
+                        Version: "2012-10-17"
+                        Statement:
+                            # Cloudwatch logs for the function
+                            -
+                                Effect: "Allow"
+                                Action:
+                                    - "logs:CreateLogGroup"
+                                    - "logs:CreateLogStream"
+                                    - "logs:PutLogEvents"
+                                    - "logs:DescribeLogStreams"
+                                Resource:
+                                    - "*"
+                            -
+                                Effect: "Allow"
+                                Action:
+                                    - "lambda:UpdateFunctionConfiguration"
+                                    - "lambda:PutFunctionConcurrency"
+                                    - "lambda:AddPermission"
+                                    - "lambda:GetFunctionConfiguration"
+                                    - "lambda:RemovePermission"
+                                    - "dynamodb:ListTables"
+                                    - "dynamodb:GetItem"
+                                    - "dynamodb:PutItem"
+                                    - "dynamodb:BatchGetItem"
+                                    - "iam:ListAttachedGroupPolicies"
+                                Resource:
+                                    - "*"
+                            -
+                                Effect: "Allow"
+                                Action:
+                                    - "dynamodb:*"
+                                Resource:
+                                    - !Join ['', ['arn:aws:dynamodb:', !Ref "AWS::Region", ':', !Ref "AWS::AccountId", ':table/', !Ref dynamoDBTable]]
+
+    LambdaFunction:
+        Type: 'AWS::Serverless::Function'
+        Properties:
+            FunctionName: 'Scotty_Blacklist'
+            Handler: lambdaHandler.lambda_handler
+            Runtime: python3.6
+            CodeUri: build/.
+            Description: Blacklist
+            MemorySize: 128
+            Timeout: 30
+            Role: !GetAtt ExecutionRole.Arn
+            Environment:
+                Variables:
+                    api_token: !Ref apiToken
+                    usersList: !Ref userList
+                    dynamoDBTable: !Ref dynamoDBTable

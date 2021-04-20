@@ -1,0 +1,15 @@
+{
+    "name": "ScottyHelp",
+    "description": "Blacklist Intent for Scotty for blacklisting Tables or Users",
+    "slots": ["users", "table", "types"],
+    "sampleUtterances": [
+        "blacklist {types} {users}",
+        "blacklist {types} {table}",
+        "blacklist remove {types} {users}",
+        "blacklist remove {types} {table}",
+        "blacklist help"
+    ],
+    "fulfillmentActivity": {
+        "type": "ReturnIntent"
+    }
+}

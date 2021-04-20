@@ -1,0 +1,19 @@
+{
+    "name": "ScottyHelp",
+    "description": "TableAccess Intent for Scotty for granting DynamoDB table access",
+    "slots": ["table", "duration"],
+    "sampleUtterances": [
+        "Access to {table} {duration}",
+        "Access to",
+        "Access for",
+        "Request",
+        "Request to",
+        "Request for",
+        "Request access for {table} until {duration}",
+        "cancel",
+        "show table access"
+    ],
+    "fulfillmentActivity": {
+        "type": "ReturnIntent"
+    }
+}

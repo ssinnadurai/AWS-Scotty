@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Resources related to Scotty LEX Bot
+Parameters:
+    TableName:
+        Type: String
+        Default: "Scotty_Config"
+
+Resources:
+    ConfigTable:
+        Type: AWS::DynamoDB::Table
+        DeletionPolicy: Retain
+        Properties:
+            TableName: !Ref TableName
+            AttributeDefinitions:
+                -
+                    AttributeName: "key"
+                    AttributeType: "S"
+            BillingMode: "PAY_PER_REQUEST"
+            KeySchema:
+                -
+                    AttributeName: "key"
+                    KeyType: "HASH"

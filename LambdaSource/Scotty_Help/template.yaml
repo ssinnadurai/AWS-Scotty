@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Help lambda function for the scotty1 bot
+
+Parameters:
+    apiToken:
+        Type: String
+        Default: ""
+    userList:
+        Type: String
+        Default: ""
+
+Resources:
+    ExecutionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    -
+                        Effect: "Allow"
+                        Principal:
+                            Service:
+                                - "lambda.amazonaws.com"
+                        Action:
+                            - "sts:AssumeRole"
+            Path: /
+            Policies:
+                -
+                    PolicyName: "AllowIAMPolicyModifications"
+                    PolicyDocument:
+                        Version: "2012-10-17"
+                        Statement:
+                            # Cloudwatch logs for the function
+                            -
+                                Effect: "Allow"
+                                Action:
+                                    - "logs:CreateLogGroup"
+                                    - "logs:CreateLogStream"
+                                    - "logs:PutLogEvents"
+                                    - "logs:DescribeLogStreams"
+                                Resource:
+                                    - "*"
+
+    LambdaFunction:
+        Type: 'AWS::Serverless::Function'
+        Properties:
+            FunctionName: 'Scotty_Help'
+            Handler: lambdaHandler.lambda_handler
+            Runtime: python3.6
+            CodeUri: build/.
+            Description: Scotty Bot Help lambda
+            MemorySize: 128
+            Timeout: 30
+            Role: !GetAtt ExecutionRole.Arn
+            Environment:
+                Variables:
+                    api_token: !Ref apiToken
+                    userList: !Ref userList

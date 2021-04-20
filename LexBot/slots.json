@@ -1,0 +1,108 @@
+{
+  "table": {
+    "slot_definition": {
+      "name": "table",
+      "description": "dynamoDB table",
+      "slotConstraint": "Required",
+      "slotType": "table",
+      "slotTypeVersion": "$LATEST",
+      "valueElicitationPrompt": {
+        "messages": [
+          {
+            "contentType": "PlainText",
+            "content": "What table would like to have access?"
+          }
+        ],
+        "maxAttempts": 2
+      },
+      "priority": 2
+    },
+    "slot_enumeration_values": [
+      {
+        "value": "table",
+        "synonyms": ["TABLE"]
+      }
+    ]
+  },
+  "duration": {
+    "slot_definition": {
+      "name": "duration",
+      "description": "duration of access",
+      "slotConstraint": "Required",
+      "slotType": "AMAZON.DATE",
+      "valueElicitationPrompt": {
+        "messages": [
+          {
+            "contentType": "PlainText",
+            "content": "What is the date of expiry?"
+          }
+        ],
+        "maxAttempts": 2
+      },
+      "priority": 3
+    },
+    "slot_enumeration_values": [
+      {
+        "value": "None",
+        "synonyms": []
+      }
+    ]
+  },
+  "users": {
+    "slot_definition": {
+      "name": "users",
+      "description": "Slack User",
+      "slotConstraint": "Required",
+      "slotType": "users",
+      "slotTypeVersion": "1",
+      "valueElicitationPrompt": {
+        "messages": [
+          {
+            "contentType": "PlainText",
+            "content": "Who is getting blacklisted?"
+          }
+        ],
+        "maxAttempts": 2
+      },
+      "priority": 2
+    },
+    "slot_enumeration_values": [
+      {
+        "value": "users",
+        "synonyms": [
+          "<@ID>"
+
+        ]
+      }
+    ]
+  },
+  "types": {
+    "slot_definition": {
+      "name": "types",
+      "description": "dynamoDB tables",
+      "slotConstraint": "Required",
+      "slotType": "types",
+      "slotTypeVersion":"$LATEST",
+      "valueElicitationPrompt": {
+        "messages": [
+          {
+            "contentType": "PlainText",
+            "content": "What table are you looking to blacklists"
+          }
+        ],
+        "maxAttempts": 2
+      },
+      "priority": 3
+    },
+    "slot_enumeration_values": [
+      {
+        "value": "types",
+        "synonyms": [
+          "show",
+          "table",
+          "user"
+        ]
+      }
+    ]
+  }
+}

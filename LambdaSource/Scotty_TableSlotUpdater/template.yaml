@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: A schedule lambda to update the Table Slot type (nightly) for the scotty1 bot
+
+Resources:
+    ExecutionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    -
+                        Effect: "Allow"
+                        Principal:
+                            Service:
+                                - "lambda.amazonaws.com"
+                        Action:
+                            - "sts:AssumeRole"
+            Path: /
+            Policies:
+                -
+                    PolicyName: "AllowIAMPolicyModifications"
+                    PolicyDocument:
+                        Version: "2012-10-17"
+                        Statement:
+                            # Cloudwatch logs for the function
+                            -
+                                Effect: "Allow"
+                                Action:
+                                    - "logs:CreateLogGroup"
+                                    - "logs:CreateLogStream"
+                                    - "logs:PutLogEvents"
+                                    - "logs:DescribeLogStreams"
+                                Resource:
+                                    - "*"
+                            -
+                                Effect: "Allow"
+                                Action:
+                                    - "dynamodb:ListTables"
+                                    - "lambda:InvokeFunction"
+                                    - "lex:GetSlotType"
+                                    - "lex:PutSlotType"
+                                    - "lex:CreateSlotTypeVersion"
+                                Resource:
+                                    - "*"
+
+    LambdaFunction:
+        Type: 'AWS::Serverless::Function'
+        Properties:
+            FunctionName: 'Scotty_TableSlotUpdater'
+            Handler: lambdaHandler.lambda_handler
+            Runtime: python3.6
+            CodeUri: build/.
+            Description: Nightly SlotType:table  updater
+            MemorySize: 128
+            Timeout: 30
+            Role: !GetAtt ExecutionRole.Arn
+
+
+    SlotScheduledRule:
+        Type: "AWS::Events::Rule"
+        Properties:
+            Description: "Update the slot type table with the latest list of dynamoDB table at 0501 GMT"
+            ScheduleExpression: "cron(1 5 * * ? *)"
+            State: "ENABLED"
+            Targets:
+                -
+                    Arn: !GetAtt LambdaFunction.Arn
+                    Id: "Table_Slot_Updater"
+
+    CreateTableLookout:
+        Type: "AWS::Events::Rule"
+        Properties:
+            Description: "Invokes when a new table is created"
+            EventPattern:
+                source:
+                    - "aws.dynamodb"
+                detail-type:
+                    - "AWS API Call via CloudTrail"
+                detail:
+                    eventSource:
+                        - "dynamodb.amazonaws.com"
+                    eventName:
+                        - "CreateTable"
+                        - "DeleteTable"
+            State: "ENABLED"
+            Targets:
+                -
+                    Arn: !GetAtt LambdaFunction.Arn
+                    Id: "Table_Slot_Updater"
+
+    LambdaInvokePermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: 'lambda:InvokeFunction'
+            Principal: events.amazonaws.com
+            SourceArn: !GetAtt SlotScheduledRule.Arn
+            FunctionName: !GetAtt LambdaFunction.Arn
+
+    CreateTablePermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: 'lambda:InvokeFunction'
+            Principal: events.amazonaws.com
+            SourceArn: !GetAtt CreateTableLookout.Arn
+            FunctionName: !GetAtt LambdaFunction.Arn
